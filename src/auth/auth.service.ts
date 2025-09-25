@@ -7,8 +7,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
-import { AuthDto } from './dto/auth.dto';
-import { Response } from 'express';
+import type { LoginUserDto, RegisterUserDto } from './dto/auth.dto';
+import { type Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -22,8 +22,8 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async login(dto: AuthDto) {
-    const user = await this.validateUser(dto.email);
+  public async login(dto: LoginUserDto) {
+    const user = await this.userService.verifyUserCredentials(dto);
     const tokens = await this.generateTokens(user.id);
 
     return {
@@ -32,7 +32,7 @@ export class AuthService {
     };
   }
 
-  public async register(dto: AuthDto) {
+  public async register(dto: RegisterUserDto) {
     const existingUser = await this.userService.getByEmail(dto.email);
 
     if (existingUser) throw new BadRequestException('User already exists');
